@@ -1,0 +1,21 @@
+from tensorflow.keras.models import load_model, Model
+
+
+def load_fx_model(pth):
+    model = load_model(pth, compile=False)
+
+    feature_layer_name = 'global_average_pooling2d_1' #'avg_pool'
+
+    model = Model(inputs=model.inputs,
+                  outputs=model.get_layer(feature_layer_name).output)
+
+    return model
+
+
+def index(dg, model_pth):
+    model = load_fx_model(model_pth)
+
+    vectors = model.predict(dg.gen)
+
+    return vectors
+
