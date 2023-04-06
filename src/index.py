@@ -1,3 +1,5 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from tensorflow.keras.models import load_model, Model
 
 
@@ -12,10 +14,10 @@ def load_fx_model(pth):
     return model
 
 
-def index(dg, model_pth):
-    model = load_fx_model(model_pth)
+def index(gen, model):
+    # model = load_fx_model(model_pth)
 
-    vectors = model.predict(dg.gen)
+    vectors = model.predict(gen)
 
     return vectors
 

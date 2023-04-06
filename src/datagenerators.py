@@ -1,9 +1,12 @@
+import pandas as pd
 from tensorflow.keras.utils import Sequence, img_to_array
 import numpy as np
 from PIL import Image
 
 
 from src.img_utils import generate_random_points, crop_image
+from src.index import index
+from src.classify import classify
 
 
 """
@@ -13,7 +16,7 @@ Process:
 - create generator from image and the points
 """
 class IdxDatagen:
-    def __init__(self, im_path, n_points, batch_size, cut_divisor=8, patch_size=256):
+    def __init__(self, im_path, n_points, batch_size, fx_model, classifier_path, cut_divisor=8, patch_size=256):
         self.im_path = im_path
         # self.n_points = n_points
         self.batch_size = batch_size
@@ -24,6 +27,7 @@ class IdxDatagen:
         self.points = generate_random_points(self.im, n_points)
 
         self.gen = self.make_generator()
+        self.point_class, self.point_desc = self.classify_vectors(fx_model, classifier_path)
 
     def cropping_fn(self, im, point):
         patch = crop_image(im, point, self.patch_size, self.cut_divisor)
@@ -33,6 +37,21 @@ class IdxDatagen:
     def make_generator(self):
         gen = RandomPointCroppingLoader(self.im, self.points, self.batch_size, self.cropping_fn)
         return gen
+
+    def classify_vectors(self, fx_model_pth, classifier_pth):
+        vectors = index(self.gen, fx_model_pth)
+        return classify(vectors, classifier_pth)
+
+    def make_df(self):
+        out = []
+        for i, p in enumerate(self.points):
+            out.append({"image_path" : self.im_path,
+                        "point_x" : p[0],
+                        "point_y" : p[1],
+                        "pred_code" : self.point_class[i],
+                        "pred_desc" : self.point_desc[i]})
+
+        return out
 
 
 class RandomPointCroppingLoader(Sequence):
