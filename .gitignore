@@ -1,6 +1,7 @@
 .idea/
 src.egg-info/
 scripts/.ipynb_checkpoints/
-scripts/
+scripts/*.ipynb
 data/images/test_ims/
 src/__pycache__/
+results/test_ims/
