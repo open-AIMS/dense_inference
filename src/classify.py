@@ -9,7 +9,7 @@ def classify(vectors, model_pth):
     model, scaler, label_encoder = import_model(model_pth)
 
     scaled = scaler.transform(vectors)
-    preds = model.predict(scaled)
+    pred_code = model.predict(scaled)
 
-    pred_labels = label_encoder.inverse_transform(preds)
-    return pred_labels
+    pred_labels = label_encoder.inverse_transform(pred_code)
+    return pred_code, pred_labels
