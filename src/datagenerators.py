@@ -27,7 +27,7 @@ class IdxDatagen:
         self.points = generate_random_points(self.im, n_points)
 
         self.gen = self.make_generator()
-        self.point_class, self.point_desc = self.classify_vectors(fx_model, classifier_path)
+        self.point_class, self.point_desc, self.point_scores = self.classify_vectors(fx_model, classifier_path)
 
     def cropping_fn(self, im, point):
         patch = crop_image(im, point, self.patch_size, self.cut_divisor)
@@ -49,7 +49,8 @@ class IdxDatagen:
                         "point_x" : p[0],
                         "point_y" : p[1],
                         "pred_code" : self.point_class[i],
-                        "pred_desc" : self.point_desc[i]})
+                        "pred_desc" : self.point_desc[i],
+                        "pred_score": self.point_scores[i]})
 
         return out
 
