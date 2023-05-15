@@ -1,4 +1,8 @@
 from datetime import datetime
+from glob import glob
+
+import os
+from pathlib import Path
 
 def convert_time(seconds):
     mins, sec = divmod(seconds, 60)
@@ -17,3 +21,23 @@ def convert_time(seconds):
 
 def timestamp():
     return datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+
+def get_ims(image_dir, ext):
+    imlist = glob(os.path.join(image_dir, '*'+'.{}'.format(ext.upper()))) + \
+             glob(os.path.join(image_dir, '*'+'.{}'.format(ext.lower())))
+
+    imlist = list(dict.fromkeys(imlist))
+    imlist = list(dict.fromkeys(imlist))
+    return imlist
+
+def get_abs_path(pth):
+    return Path(__file__).parent / pth
+
+def make_run_name(n_points):
+    ts = timestamp()
+    return "{}-points_{}".format(n_points, ts)
+
+def make_run_name_df(df_path):
+    ts = timestamp()
+    return "{}_{}".format(os.path.splitext(os.path.basename(df_path))[0], ts)
