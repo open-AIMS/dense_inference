@@ -24,11 +24,11 @@ would classify 5 random points in each image and save the results in `results/te
 
 From the root directory of the project run:
 
-    scripts/inference_from_csv.py -d 'path/to/points.csv' -i 'path/to/image_directory' -e 'JPG'
+    python scripts/inference_from_csv.py -d 'path/to/points.csv' -i 'path/to/image_directory' -e 'JPG'
 
 For example, if the csv is `data/images/SAM_points_test.csv` and images are JPGs and are in `data/images/test_ims`
 
-    scripts/inference_from_csv.py -d 'data/images/SAM_points_test.csv' -i data/images/test_ims/ -e 'JPG'
+    python scripts/inference_from_csv.py -d 'data/images/SAM_points_test.csv' -i data/images/test_ims/ -e 'JPG'
 
 would classify the csv points and save the results in `results/SAM_points/`
 

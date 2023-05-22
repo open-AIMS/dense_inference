@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.datagenerators import IdxDatagen_pts
+from src.datagenerators import IdxDatagen_pts_cents
 from src.utils import get_ims, get_abs_path, make_run_name_df
 from src.index import load_fx_model
 
@@ -51,7 +51,7 @@ def do_classification(csv_path,
         im_df = df[df[im_col] == im]
 
         # make the generator
-        gen_obj = IdxDatagen_pts(im_df,
+        gen_obj = IdxDatagen_pts_cents(im_df,
                                  batch_size,
                                  fx_model,
                                  classifier_path,

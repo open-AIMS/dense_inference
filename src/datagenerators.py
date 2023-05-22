@@ -116,6 +116,75 @@ class IdxDatagen_pts:
 
         return out
 
+
+class IdxDatagen_pts_cents:
+    def __init__(self,
+                 im_df,
+                 batch_size,
+                 fx_model,
+                 classifier_path,
+                 im_col="camera_id",
+                 xcol="U",
+                 ycol="V",
+                 cent_col="SAM_centroid",
+                 vertx_col="vertex_x",
+                 verty_col="vertex_y",
+                 cut_divisor=8, patch_size=256):
+
+        self.im_df = im_df
+        # self.n_points = n_points
+        self.batch_size = batch_size
+        self.patch_size = patch_size
+        self.cut_divisor = cut_divisor
+
+        self.im_path, self.points, self.centroid, self.vertx, self.verty = self.parse_df(im_col=im_col, xcol=xcol, ycol=ycol)
+
+        self.im = Image.open(self.im_path)
+        # self.points = generate_random_points(self.im, n_points)
+
+        self.gen = self.make_generator()
+        self.point_class, self.point_desc, self.point_scores = self.classify_vectors(fx_model, classifier_path)
+
+    #
+    def parse_df(self, im_col="camera_id", xcol="U", ycol="V", cent_col="SAM_centroid", vertx_col="vertex_x", verty_col="vertex_y"):
+        impth = self.im_df[im_col].unique()[0]
+        x = self.im_df[xcol].apply(lambda col: int(np.round(col)))
+        y = self.im_df[ycol].apply(lambda col: int(np.round(col)))
+        centroid = self.im_df[cent_col].unique()[0]
+        vertx = self.im_df[vertx_col].unique()[0]
+        verty = self.im_df[verty_col].unique()[0]
+        pointset = np.column_stack([x.to_numpy(), y.to_numpy()])
+
+        return impth, pointset, centroid, vertx, verty
+
+    def cropping_fn(self, im, point):
+        patch = crop_image(im, point, self.patch_size, self.cut_divisor)
+        patch = img_to_array(patch)
+        return patch
+
+    def make_generator(self):
+        gen = RandomPointCroppingLoader(self.im, self.points, self.batch_size, self.cropping_fn)
+        return gen
+
+    def classify_vectors(self, fx_model_pth, classifier_pth):
+        vectors = index(self.gen, fx_model_pth)
+        return classify(vectors, classifier_pth)
+
+    def make_df(self):
+        out = []
+        for i, p in enumerate(self.points):
+            out.append({"image_path": self.im_path,
+                        "SAM_centroid": self.centroid,
+                        "vertex_x": self.vertx,
+                        "vertex_y": self.verty,
+                        "point_x": p[0],
+                        "point_y": p[1],
+                        "pred_code": self.point_class[i],
+                        "pred_desc": self.point_desc[i],
+                        "pred_score": self.point_scores[i]})
+
+        return out
+
 class RandomPointCroppingLoader(Sequence):
 
     def __init__(self, im, points, batch_size, cropping_fn):
