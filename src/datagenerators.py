@@ -150,12 +150,12 @@ class IdxDatagen_pts_cents:
         impth = self.im_df[im_col].unique()[0]
         x = self.im_df[xcol].apply(lambda col: int(np.round(col)))
         y = self.im_df[ycol].apply(lambda col: int(np.round(col)))
-        centroid = self.im_df[cent_col].unique()[0]
-        vertx = self.im_df[vertx_col].unique()[0]
-        verty = self.im_df[verty_col].unique()[0]
+        centroids = self.im_df[cent_col].to_numpy()
+        vertx = self.im_df[vertx_col].to_numpy()
+        verty = self.im_df[verty_col].to_numpy()
         pointset = np.column_stack([x.to_numpy(), y.to_numpy()])
 
-        return impth, pointset, centroid, vertx, verty
+        return impth, pointset, centroids, vertx, verty
 
     def cropping_fn(self, im, point):
         patch = crop_image(im, point, self.patch_size, self.cut_divisor)
@@ -174,9 +174,9 @@ class IdxDatagen_pts_cents:
         out = []
         for i, p in enumerate(self.points):
             out.append({"image_path": self.im_path,
-                        "SAM_centroid": self.centroid,
-                        "vertex_x": self.vertx,
-                        "vertex_y": self.verty,
+                        "SAM_centroid": self.centroid[i],
+                        "vertex_x": self.vertx[i],
+                        "vertex_y": self.verty[i],
                         "point_x": p[0],
                         "point_y": p[1],
                         "pred_code": self.point_class[i],
