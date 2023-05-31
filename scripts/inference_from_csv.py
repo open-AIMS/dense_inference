@@ -9,6 +9,21 @@ from tqdm import tqdm
 
 import argparse
 
+def make_results_dir(run_name, csv_path, results_path='../results/SAM_points'):
+    results_path = get_abs_path(results_path)
+    if not os.path.exists(results_path):
+        os.mkdir(results_path)
+
+    csv_name = os.path.basename(os.path.splitext(csv_path)[0])
+
+    results_path = os.path.join(results_path, csv_name)
+    if not os.path.exists(results_path):
+        os.mkdir(results_path)
+
+    outpth = os.path.join(results_path, run_name + ".csv")
+
+    return outpth
+
 
 def do_classification(csv_path,
                       im_dir,
@@ -18,6 +33,11 @@ def do_classification(csv_path,
                       im_col="camera_id",
                       fx_model_path='../data/models/feature_extractor/weights.best.hdf5'):
     print("Imdir exists?", os.path.exists(im_dir))
+
+    run_name = make_run_name_df(csv_path)
+
+    # make results directory and generate output csv path
+    results_pth = make_results_dir(run_name, csv_path)
 
     df = pd.read_csv(csv_path)
 
@@ -37,7 +57,7 @@ def do_classification(csv_path,
     # classifier_path = '../data/models/classifier/ecorrap_community_composition-latest-230404.sav'
     classifier_path = get_abs_path(classifier_path)
 
-    run_name = make_run_name_df(csv_path)
+
 
     out_list = []
 
@@ -57,29 +77,15 @@ def do_classification(csv_path,
                                  classifier_path,
                                  cut_divisor=8, patch_size=256)
 
+        # TODO: update csv every now and then
         # add new predictions to results list
-        out_list.extend(gen_obj.make_df())
+        outdf = pd.DataFrame(gen_obj.make_df())
+        if not os.path.exists(results_pth):
+            outdf.to_csv(results_pth, index=False)
+        else:
+            outdf.to_csv(results_pth, mode='a', index=False, header=False)
 
-    # make a dataframe of the predictions
-    out_df = pd.DataFrame(out_list)
-
-    # create the results directory
-    results_path = '../results/SAM_points'
-    results_path = get_abs_path(results_path)
-    if not os.path.exists(results_path):
-        os.mkdir(results_path)
-
-    csv_name = os.path.basename(os.path.splitext(csv_path)[0])
-
-    results_path = os.path.join(results_path, csv_name)
-    if not os.path.exists(results_path):
-        os.mkdir(results_path)
-
-    # save results df
-    outpth = os.path.join(results_path, run_name + ".csv")
-    out_df.to_csv(outpth, index=False)
-
-    print("Saved classified points to {}".format(outpth))
+    print("Saved classified points to {}".format(results_pth))
 
 if __name__ == "__main__":
 
