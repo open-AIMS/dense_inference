@@ -176,7 +176,7 @@ class IdxDatagen_pts_cents:
         for i, p in enumerate(self.points):
             out.append({"image_path": self.im_path,
                         "SAM_centroid": self.centroid[i],
-                        "distance": self.dists,
+                        "distance": self.dists[i],
                         "vertex_x": self.vertx[i],
                         "vertex_y": self.verty[i],
                         "point_x": p[0],
