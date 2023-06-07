@@ -137,7 +137,7 @@ class IdxDatagen_pts_cents:
         self.patch_size = patch_size
         self.cut_divisor = cut_divisor
 
-        self.im_path, self.points, self.centroid, self.vertx, self.verty = self.parse_df(im_col=im_col, xcol=xcol, ycol=ycol)
+        self.im_path, self.points, self.centroid, self.vertx, self.verty, self.dists = self.parse_df(im_col=im_col, xcol=xcol, ycol=ycol)
 
         self.im = Image.open(self.im_path)
         # self.points = generate_random_points(self.im, n_points)
@@ -146,16 +146,17 @@ class IdxDatagen_pts_cents:
         self.point_class, self.point_desc, self.point_scores = self.classify_vectors(fx_model, classifier_path)
 
     #
-    def parse_df(self, im_col="camera_id", xcol="U", ycol="V", cent_col="SAM_centroid", vertx_col="vertex_x", verty_col="vertex_y"):
+    def parse_df(self, im_col="camera_id", xcol="U", ycol="V", cent_col="SAM_centroid", vertx_col="vertex_x", verty_col="vertex_y", distance_col="dis"):
         impth = self.im_df[im_col].unique()[0]
         x = self.im_df[xcol].apply(lambda col: int(np.round(col)))
         y = self.im_df[ycol].apply(lambda col: int(np.round(col)))
         centroids = self.im_df[cent_col].to_numpy()
+        dists = self.im_df[distance_col].to_numpy()
         vertx = self.im_df[vertx_col].to_numpy()
         verty = self.im_df[verty_col].to_numpy()
         pointset = np.column_stack([x.to_numpy(), y.to_numpy()])
 
-        return impth, pointset, centroids, vertx, verty
+        return impth, pointset, centroids, vertx, verty, dists
 
     def cropping_fn(self, im, point):
         patch = crop_image(im, point, self.patch_size, self.cut_divisor)
@@ -175,6 +176,7 @@ class IdxDatagen_pts_cents:
         for i, p in enumerate(self.points):
             out.append({"image_path": self.im_path,
                         "SAM_centroid": self.centroid[i],
+                        "distance": self.dists,
                         "vertex_x": self.vertx[i],
                         "vertex_y": self.verty[i],
                         "point_x": p[0],
