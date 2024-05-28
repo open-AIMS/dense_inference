@@ -7,6 +7,10 @@ create and activate a virtual/conda environment, then inside the root directory 
     pip install -e .
     pip install -r requirements.txt
 
+### Classifier models
+
+An example model is provided, however if you have an existing ReefCloud project, contact [Nader Boutros](<mailto:n.boutros@aims.gov.au?subject=dense inference model>) with the name of your ReefCloud project to export your model for use with this code.
+
 ### Usage
 1. To classify some images, make a new directory inside `data/images/` and add in your images. They should all have the same extension
 
